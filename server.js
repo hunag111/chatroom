@@ -8,7 +8,13 @@ const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+
+// 端口从环境变量读取（Render 需要）
+const PORT = process.env.PORT || 3000;
+
+const io = new Server(server, {
+  cors: { origin: '*' }
+});
 
 // 图片上传目录
 const uploadDir = path.join(__dirname, 'public', 'uploads');
@@ -23,7 +29,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('只支持图片格式'));
@@ -83,7 +89,7 @@ io.on('connection', (socket) => {
       id: crypto.randomUUID(),
       username,
       message: message ? message.trim() : '',
-      type: type || 'text', // text | image
+      type: type || 'text',
       imageUrl: imageUrl || null,
       timestamp: Date.now()
     };
@@ -100,5 +106,4 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => console.log(`✅ ChatRoom v3 ready: http://localhost:${PORT}`));
+server.listen(PORT, '0.0.0.0', () => console.log(`ChatRoom running on port ${PORT}`));
